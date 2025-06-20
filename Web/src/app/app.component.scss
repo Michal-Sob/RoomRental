@@ -1,0 +1,71 @@
+.app-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.sidenav {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidenav-header {
+  padding: 2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.sidenav-header h2 {
+  margin: 0;
+  font-weight: 300;
+  font-size: 1.5rem;
+}
+
+.active-link {
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-radius: 8px;
+  margin: 0 1rem;
+}
+
+.active-link mat-icon {
+  color: #667eea;
+}
+
+.toolbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: #333;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.main-content {
+  background: transparent;
+}
+
+.content {
+  padding: 2rem;
+  min-height: calc(100vh - 64px);
+}
+
+mat-nav-list {
+  padding-top: 0;
+}
+
+mat-list-item {
+  margin-bottom: 0.5rem;
+}

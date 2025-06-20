@@ -1,0 +1,106 @@
+<div class="reservation-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>add_circle</mat-icon>
+        New Reservation
+      </mat-card-title>
+      <mat-card-subtitle>
+        Create a new room reservation
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="form-container">
+    <mat-card class="form-card">
+      <mat-card-content>
+        <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+          <div class="form-grid">
+            <!-- Building Selection -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Building</mat-label>
+              <mat-select formControlName="buildingId" (selectionChange)="onBuildingChange($event.value)">
+                <mat-option *ngFor="let building of buildings" [value]="building.id">
+                  {{building.name}} - {{building.address}}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>business</mat-icon>
+            </mat-form-field>
+
+            <!-- Room Selection -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Room</mat-label>
+              <mat-select formControlName="roomId" [disabled]="!selectedBuilding">
+                <mat-option *ngFor="let room of availableRooms" [value]="room.id">
+                  {{room.name}} ({{room.capacity}} people, Floor {{room.floor}})
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>meeting_room</mat-icon>
+            </mat-form-field>
+
+            <!-- Date -->
+            <mat-form-field appearance="outline">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="date" [min]="minDate">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Start Time -->
+            <mat-form-field appearance="outline">
+              <mat-label>Start Time</mat-label>
+              <input matInput type="time" formControlName="startTime">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+
+            <!-- End Time -->
+            <mat-form-field appearance="outline">
+              <mat-label>End Time</mat-label>
+              <input matInput type="time" formControlName="endTime">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Selected Room Info -->
+          <div *ngIf="selectedRoom" class="room-info-card">
+            <h3>Selected Room Information</h3>
+            <div class="room-details">
+              <div class="detail-item">
+                <mat-icon>meeting_room</mat-icon>
+                <span>{{selectedRoom?.name}}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>people</mat-icon>
+                <span>Capacity: {{selectedRoom?.capacity}} people</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>layers</mat-icon>
+                <span>Floor: {{selectedRoom?.floor}}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>category</mat-icon>
+                <span *ngIf="selectedRoom"> Type: {{RoomType[selectedRoom.type]}}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button mat-raised-button type="button" (click)="resetForm()">
+              <mat-icon>refresh</mat-icon>
+              Reset
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="!reservationForm.valid || isLoading">
+              <mat-icon>save</mat-icon>
+              {{isLoading ? 'Creating...' : 'Create Reservation'}}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

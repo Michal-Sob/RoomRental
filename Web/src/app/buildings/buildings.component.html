@@ -1,0 +1,120 @@
+<div class="buildings-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>business</mat-icon>
+        Buildings & Rooms
+      </mat-card-title>
+      <mat-card-subtitle>
+        Select a building to view available rooms
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="content-grid">
+    <!-- Buildings List -->
+    <mat-card class="buildings-card">
+      <mat-card-header>
+        <mat-card-title>Buildings</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="buildings-list">
+          <mat-card
+            *ngFor="let building of buildings"
+            class="building-item"
+            [class.selected]="selectedBuilding?.id === building.id"
+            (click)="selectBuilding(building)"
+            matRipple>
+            <mat-card-content>
+              <div class="building-info">
+                <h3>{{building.name}}</h3>
+                <p class="address">
+                  <mat-icon class="small-icon">location_on</mat-icon>
+                  {{building.address}}
+                </p>
+                <div class="building-details">
+                      <span class="detail-chip">
+                        <mat-icon class="small-icon">layers</mat-icon>
+                        {{building.numberOfFloors}} floors
+                      </span>
+                  <span class="detail-chip">
+                        <mat-icon class="small-icon">schedule</mat-icon>
+                    {{building.openingTime}} - {{building.closingTime}}
+                      </span>
+                </div>
+              </div>
+              <div class="building-status">
+                <mat-chip [class]="'status-' + building.status">
+                  {{getBuildingStatusText(building.status)}}
+                </mat-chip>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Rooms List -->
+    <mat-card class="rooms-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{selectedBuilding ? selectedBuilding?.name + ' - Rooms' : 'Select a Building'}}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="!selectedBuilding" class="empty-state">
+          <mat-icon class="empty-icon">business</mat-icon>
+          <h3>No Building Selected</h3>
+          <p>Choose a building from the list to view its rooms</p>
+        </div>
+
+        <div *ngIf="selectedBuilding && rooms.length === 0" class="empty-state">
+          <mat-icon class="empty-icon">meeting_room</mat-icon>
+          <h3>No Rooms Available</h3>
+          <p>This building has no available rooms</p>
+        </div>
+
+        <div class="rooms-grid" *ngIf="rooms.length > 0">
+          <mat-card *ngFor="let room of rooms" class="room-card" matRipple>
+            <mat-card-content>
+              <div class="room-header">
+                <h3>{{room.name}}</h3>
+                <mat-chip [class]="'type-' + room.type">
+                  {{getRoomTypeText(room.type)}}
+                </mat-chip>
+              </div>
+
+              <div class="room-details">
+                <div class="detail-row">
+                  <mat-icon class="detail-icon">people</mat-icon>
+                  <span>Capacity: {{room.capacity}} people</span>
+                </div>
+                <div class="detail-row">
+                  <mat-icon class="detail-icon">layers</mat-icon>
+                  <span>Floor: {{room.floor}}</span>
+                </div>
+                <div class="detail-row">
+                  <mat-icon class="detail-icon">circle</mat-icon>
+                  <span class="status-text" [class]="'status-' + room.status">
+                        {{getRoomStatusText(room.status)}}
+                      </span>
+                </div>
+              </div>
+
+              <div class="room-actions">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="room.status !== 0"
+                  (click)="reserveRoom(room)">
+                  <mat-icon>event</mat-icon>
+                  Reserve
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
