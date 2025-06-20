@@ -22,7 +22,7 @@ export enum ReservationStatus {
   Cancelled = 2
 }
 
-export interface Building {
+export interface BuildingListDto {
   id: number;
   name: string;
   address: string;
@@ -30,10 +30,20 @@ export interface Building {
   status: BuildingStatus;
   openingTime: string;
   closingTime: string;
-  rooms?: Room[];
 }
 
-export interface Room {
+export interface BuildingDto {
+  id: number;
+  name: string;
+  address: string;
+  numberOfFloors: number;
+  status: BuildingStatus;
+  openingTime: string;
+  closingTime: string;
+  rooms?: RoomDto[];
+}
+
+export interface RoomDto {
   id: number;
   name: string;
   capacity: number;
@@ -41,28 +51,40 @@ export interface Room {
   type: RoomType;
   status: RoomStatus;
   buildingId: number;
-  building?: Building;
+  buildingName?: string;
 }
 
-export interface User {
+export interface RoomDetailsDto {
   id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  departmentId: number;
+  name: string;
+  capacity: number;
+  floor: number;
+  type: RoomType;
+  status: RoomStatus;
+  buildingId: number;
+  building?: BuildingListDto;
 }
 
-export interface Reservation {
+export interface ReservationDto {
   id: number;
   date: string;
   startTime: string;
   endTime: string;
   status: ReservationStatus;
   userId: number;
-  user?: User;
   roomId: number;
-  room?: Room;
+  room?: RoomDto;
+}
+
+export interface ReservationListDto {
+  id: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: ReservationStatus;
+  userName: string;
+  roomName: string;
+  buildingName: string;
 }
 
 export interface CreateReservationDto {
@@ -72,3 +94,6 @@ export interface CreateReservationDto {
   userId: number;
   roomId: number;
 }
+
+
+

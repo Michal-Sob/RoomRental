@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Building, Room} from '../../models/models';
+import {BuildingListDto, RoomDto, BuildingDto} from '../../models/models';
 import {ApiService} from "../../services/api.service";
 import {CommonModule} from "@angular/common";
 import {MatCardModule} from "@angular/material/card";
@@ -7,6 +7,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {MatChipsModule} from "@angular/material/chips";
 import {MatRippleModule} from "@angular/material/core";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-buildings',
@@ -23,11 +24,11 @@ import {MatRippleModule} from "@angular/material/core";
   styleUrl: './buildings.component.scss'
 })
 export class BuildingsComponent implements OnInit {
-  buildings: Building[] = [];
-  rooms: Room[] = [];
-  selectedBuilding: Building | null = null;
+  buildings: BuildingListDto[] = [];
+  rooms: RoomDto[] = [];
+  selectedBuilding: BuildingDto | null = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadBuildings();
@@ -44,7 +45,7 @@ export class BuildingsComponent implements OnInit {
     });
   }
 
-  selectBuilding(building: Building): void {
+  selectBuilding(building: BuildingDto): void {
     this.selectedBuilding = building;
     this.loadRooms(building.id);
   }
@@ -60,9 +61,8 @@ export class BuildingsComponent implements OnInit {
     });
   }
 
-  reserveRoom(room: Room): void {
-    // Navigate to reservation form with selected room
-    // This will be implemented in the routing
+  reserveRoom(room: RoomDto): void {
+    this.router.navigate(['/reservation', room.id]);
     console.log('Reserve room:', room);
   }
 

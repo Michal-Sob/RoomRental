@@ -1,0 +1,231 @@
+<div class="reservations-container">
+  <!-- Header -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>event</mat-icon>
+        My Reservations
+      </mat-card-title>
+      <mat-card-subtitle>
+        Manage your room reservations
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading your reservations...</p>
+  </div>
+
+  <!-- Tabs for types -->
+  <mat-card class="content-card" *ngIf="!isLoading">
+    <mat-tab-group class="reservations-tabs" (selectedTabChange)="onTabChange($event)">
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">schedule</mat-icon>
+          Upcoming ({{upcomingReservations.length}})
+        </ng-template>
+
+        <div class="tab-content">
+          <div *ngIf="upcomingReservations.length === 0" class="empty-state">
+            <mat-icon class="empty-icon">event_available</mat-icon>
+            <h3>No Upcoming Reservations</h3>
+            <p>You don't have any upcoming reservations</p>
+            <button mat-raised-button color="primary" routerLink="/new-reservation">
+              <mat-icon>add</mat-icon>
+              Create New Reservation
+            </button>
+          </div>
+
+          <div class="reservations-grid" *ngIf="upcomingReservations.length > 0">
+            <mat-card
+              *ngFor="let reservation of upcomingReservations"
+              class="reservation-card upcoming-card"
+              [class.today]="isToday(reservation.date)">
+
+              <mat-card-header class="reservation-header">
+                <div class="reservation-title">
+                  <h3>{{reservation.room?.name}}</h3>
+                  <mat-chip [class]="'status-' + reservation.status">
+                    {{getStatusText(reservation.status)}}
+                  </mat-chip>
+                </div>
+                <div class="reservation-date">
+                  <mat-icon>event</mat-icon>
+                  <span [class.today-date]="isToday(reservation.date)">
+                        {{formatDate(reservation.date)}}
+                      </span>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="reservation-details">
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">business</mat-icon>
+                    <span>{{reservation.room?.buildingName}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">layers</mat-icon>
+                    <span>Floor {{reservation.room?.floor}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">schedule</mat-icon>
+                    <span>{{reservation.startTime}} - {{reservation.endTime}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">people</mat-icon>
+                    <span>Capacity: {{reservation.room?.capacity}} people</span>
+                  </div>
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions class="reservation-actions">
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="viewDetails(reservation)">
+                  <mat-icon>visibility</mat-icon>
+                  Details
+                </button>
+                <button
+                  mat-button
+                  color="warn"
+                  [disabled]="!canCancel(reservation)"
+                  (click)="cancelReservation(reservation)">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Past Reservations -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">history</mat-icon>
+          History ({{pastReservations.length}})
+        </ng-template>
+
+        <div class="tab-content">
+          <div *ngIf="pastReservations.length === 0" class="empty-state">
+            <mat-icon class="empty-icon">history</mat-icon>
+            <h3>No Past Reservations</h3>
+            <p>Your reservation history will appear here</p>
+          </div>
+
+          <div class="reservations-grid" *ngIf="pastReservations.length > 0">
+            <mat-card
+              *ngFor="let reservation of pastReservations"
+              class="reservation-card past-card">
+
+              <mat-card-header class="reservation-header">
+                <div class="reservation-title">
+                  <h3>{{reservation.room?.name}}</h3>
+                  <mat-chip [class]="'status-' + reservation.status">
+                    {{getStatusText(reservation.status)}}
+                  </mat-chip>
+                </div>
+                <div class="reservation-date">
+                  <mat-icon>event</mat-icon>
+                  <span>{{formatDate(reservation.date)}}</span>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="reservation-details">
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">business</mat-icon>
+                    <span>{{reservation.room?.buildingName}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">schedule</mat-icon>
+                    <span>{{reservation.startTime}} - {{reservation.endTime}}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions class="reservation-actions">
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="viewDetails(reservation)">
+                  <mat-icon>visibility</mat-icon>
+                  Details
+                </button>
+                <button
+                  mat-button
+                  (click)="bookAgain(reservation)">
+                  <mat-icon>refresh</mat-icon>
+                  Book Again
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Cancelled Reservations -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">cancel</mat-icon>
+          Cancelled ({{cancelledReservations.length}})
+        </ng-template>
+
+        <div class="tab-content">
+          <div *ngIf="cancelledReservations.length === 0" class="empty-state">
+            <mat-icon class="empty-icon">cancel</mat-icon>
+            <h3>No Cancelled Reservations</h3>
+            <p>Your cancelled reservations will appear here</p>
+          </div>
+
+          <div class="reservations-grid" *ngIf="cancelledReservations.length > 0">
+            <mat-card
+              *ngFor="let reservation of cancelledReservations"
+              class="reservation-card cancelled-card">
+
+              <mat-card-header class="reservation-header">
+                <div class="reservation-title">
+                  <h3>{{reservation.room?.name}}</h3>
+                  <mat-chip class="status-cancelled">
+                    Cancelled
+                  </mat-chip>
+                </div>
+                <div class="reservation-date">
+                  <mat-icon>event</mat-icon>
+                  <span>{{formatDate(reservation.date)}}</span>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="reservation-details">
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">business</mat-icon>
+                    <span>{{reservation.room?.buildingName}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <mat-icon class="detail-icon">schedule</mat-icon>
+                    <span>{{reservation.startTime}} - {{reservation.endTime}}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions class="reservation-actions">
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="bookAgain(reservation)">
+                  <mat-icon>refresh</mat-icon>
+                  Book Again
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </mat-card>
+</div>

@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Building, CreateReservationDto, Room, RoomType} from "../../models/models";
+import {BuildingDto, CreateReservationDto, RoomDto, RoomType, BuildingListDto} from "../../models/models";
 import {ApiService} from '../../services/api.service';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCardModule} from "@angular/material/card";
@@ -32,10 +32,10 @@ import {NgForOf, NgIf} from "@angular/common";
 })
 export class NewReservationComponent implements OnInit {
   reservationForm: FormGroup;
-  buildings: Building[] = [];
-  availableRooms: Room[] = [];
-  selectedBuilding: Building | null = null;
-  selectedRoom: Room | null = null;
+  buildings: BuildingListDto[] = [];
+  availableRooms: RoomDto[] = [];
+  selectedBuilding: BuildingDto | null = null;
+  selectedRoom: RoomDto | null = null;
   isLoading = false;
   minDate = new Date();
   RoomType = RoomType;

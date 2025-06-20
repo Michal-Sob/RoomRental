@@ -56,22 +56,36 @@ public class ReservationService : IReservationService
             throw new InvalidOperationException("Failed to retrieve created reservation");
     }
 
-    public async Task<IEnumerable<ReservationListDto>> GetAllReservationsAsync()
+    public async Task<IEnumerable<ReservationDto>> GetAllReservationsAsync()
     {
         return await _context.Reservations
-            .Select(r => new ReservationListDto
+            .Include(r => r.User)
+            .ThenInclude(u => u.Department)
+            .Include(r => r.Room)
+            .ThenInclude(room => room.Building)
+            .OrderByDescending(r => r.Date)
+            .ThenBy(r => r.StartTime)
+            .Select(r => new ReservationDto
             {
                 Id = r.Id,
                 Date = r.Date,
                 StartTime = r.StartTime.ToString(@"hh\:mm"),
                 EndTime = r.EndTime.ToString(@"hh\:mm"),
                 Status = (int)r.Status,
-                UserName = $"{r.User.FirstName} {r.User.LastName}",
-                RoomName = r.Room.Name,
-                BuildingName = r.Room.Building.Name
+                UserId = r.UserId,
+                RoomId = r.RoomId,
+                Room = new RoomDto
+                {
+                    Id = r.Room.Id,
+                    Name = r.Room.Name,
+                    Capacity = r.Room.Capacity,
+                    Floor = r.Room.Floor,
+                    Type = (int)r.Room.Type,
+                    Status = (int)r.Room.Status,
+                    BuildingId = r.Room.BuildingId,
+                    BuildingName = r.Room.Building.Name
+                }
             })
-            .OrderByDescending(r => r.Date)
-            .ThenBy(r => r.StartTime)
             .ToListAsync();
     }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Building, Room, Reservation, CreateReservationDto } from '../models/models';
+import { CreateReservationDto, ReservationDto, BuildingDto, RoomDto, BuildingListDto } from '../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -11,25 +11,25 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  getBuildings(): Observable<Building[]> {
-    return this.http.get<Building[]>(`${this.baseUrl}/buildings`);
+  getBuildings(): Observable<BuildingListDto[]> {
+    return this.http.get<BuildingListDto[]>(`${this.baseUrl}/buildings`);
   }
 
 
-  getBuildingWithRooms(buildingId: number): Observable<Building> {
-    return this.http.get<Building>(`${this.baseUrl}/buildings/${buildingId}/rooms`);
+  getBuildingWithRooms(buildingId: number): Observable<BuildingDto> {
+    return this.http.get<BuildingDto>(`${this.baseUrl}/buildings/${buildingId}/rooms`);
   }
 
-  getRoomsByBuilding(buildingId: number): Observable<Room[]> {
-    return this.http.get<Room[]>(`${this.baseUrl}/rooms/building/${buildingId}`);
+  getRoomsByBuilding(buildingId: number): Observable<RoomDto[]> {
+    return this.http.get<RoomDto[]>(`${this.baseUrl}/rooms/building/${buildingId}`);
   }
 
 
-  getReservations(): Observable<Reservation[]> {
-    return this.http.get<Reservation[]>(`${this.baseUrl}/reservations`);
+  getReservations(): Observable<ReservationDto[]> {
+    return this.http.get<ReservationDto[]>(`${this.baseUrl}/reservations`);
   }
 
-  createReservation(reservation: CreateReservationDto): Observable<Reservation> {
-    return this.http.post<Reservation>(`${this.baseUrl}/reservations`, reservation);
+  createReservation(reservation: CreateReservationDto): Observable<ReservationDto> {
+    return this.http.post<ReservationDto>(`${this.baseUrl}/reservations`, reservation);
   }
 }
