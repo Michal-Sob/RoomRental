@@ -18,6 +18,5 @@ public class Equipment : BaseEntity
     public DateTime PurchaseDate { get; set; }
     public EquipmentStatus Status { get; set; }
 
-    // Navigation properties
     public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
 }

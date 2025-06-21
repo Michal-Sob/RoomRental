@@ -62,7 +62,7 @@ export class BuildingsComponent implements OnInit {
   }
 
   reserveRoom(room: RoomDto): void {
-    this.router.navigate(['/reservation', room.id]);
+    this.router.navigate(['/new-reservation', room.buildingId, room.id]);
     console.log('Reserve room:', room);
   }
 

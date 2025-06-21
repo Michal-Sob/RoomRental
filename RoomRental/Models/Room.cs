@@ -5,6 +5,13 @@ namespace RoomRental.Models;
 
 public class Room : BaseEntity
 {
+    protected Room() {}
+    
+    public Room(Building building)
+    {
+        Building = building ?? throw new ArgumentNullException(nameof(building));
+    }
+    
     [Required]
     [StringLength(50)]
     public string Name { get; set; }

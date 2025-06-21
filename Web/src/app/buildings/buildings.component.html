@@ -23,8 +23,7 @@
             *ngFor="let building of buildings"
             class="building-item"
             [class.selected]="selectedBuilding?.id === building.id"
-            (click)="selectBuilding(building)"
-            matRipple>
+            (click)="selectBuilding(building)">
             <mat-card-content>
               <div class="building-info">
                 <h3>{{building.name}}</h3>
@@ -75,7 +74,7 @@
         </div>
 
         <div class="rooms-grid" *ngIf="rooms.length > 0">
-          <mat-card *ngFor="let room of rooms" class="room-card" matRipple>
+          <mat-card *ngFor="let room of rooms" class="room-card">
             <mat-card-content>
               <div class="room-header">
                 <h3>{{room.name}}</h3>

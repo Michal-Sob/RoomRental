@@ -19,6 +19,5 @@ public class MenuItem : BaseEntity
     [StringLength(200)]
     public string Allergens { get; set; }
 
-    // Navigation properties
     public virtual ICollection<Catering> Caterings { get; set; } = new List<Catering>();
 }

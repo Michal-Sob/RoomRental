@@ -16,16 +16,14 @@ public class Notification : BaseEntity
     public DateTime SentAt { get; set; }
     public bool IsDelivered { get; set; }
 
-    // Foreign Key
     public int UserId { get; set; }
 
-    // Navigation property
     [ForeignKey("UserId")]
     public virtual User User { get; set; }
 
     public void Send()
     {
         SentAt = DateTime.UtcNow;
-        IsDelivered = true; // Simulation of sending
+        IsDelivered = true;
     }
 }

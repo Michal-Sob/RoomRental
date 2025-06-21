@@ -147,4 +147,57 @@ public class ReservationService : IReservationService
             })
             .FirstOrDefaultAsync();
     }
+    
+    public async Task<bool> CancelReservationAsync(int reservationId)
+    {
+        var reservation = await _context.Reservations
+            .Include(r => r.Room)
+            .Include(r => r.User)
+            .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+        if (reservation == null)
+            return false;
+
+        if (!await CanCancelReservationAsync(reservationId))
+            return false;
+
+        reservation.Status = ReservationStatus.Cancelled;
+        reservation.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> CanCancelReservationAsync(int reservationId)
+    {
+        var reservation = await _context.Reservations
+            .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+        if (reservation == null)
+            return false;
+        if (reservation.Status != ReservationStatus.Confirmed)
+            return false;
+
+        var reservationDateTime = reservation.Date.Add(reservation.StartTime);
+        var hoursUntilReservation = (reservationDateTime - DateTime.Now).TotalHours;
+
+        return hoursUntilReservation > 2;
+    }
+    
+    public async Task<bool> DeleteReservationAsync(int reservationId)
+    {
+        var reservation = await _context.Reservations
+            .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+        if (reservation == null)
+            return false;
+
+        // Only cancelled reservations
+        if (reservation.Status != ReservationStatus.Cancelled)
+            return false;
+
+        _context.Reservations.Remove(reservation);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

@@ -20,7 +20,6 @@ public class Building : BaseEntity
     public TimeSpan OpeningTime { get; set; }
     public TimeSpan ClosingTime { get; set; }
 
-    // Navigation properties
     public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
 
     public bool IsOpen(DateTime dateTime)

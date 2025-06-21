@@ -18,6 +18,5 @@ public class Department : BaseEntity
     [Range(0, double.MaxValue)]
     public decimal Budget { get; set; }
 
-    // Navigation properties
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

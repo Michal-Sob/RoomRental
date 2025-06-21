@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import {MatButtonModule} from "@angular/material/button";
 import {MatInputModule} from "@angular/material/input";
 import {NgForOf, NgIf} from "@angular/common";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-new-reservation',
@@ -40,10 +41,14 @@ export class NewReservationComponent implements OnInit {
   minDate = new Date();
   RoomType = RoomType;
 
+  private preSelectedBuildingId: number | null = null;
+  private preSelectedRoomId: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private apiService: ApiService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute
   ) {
     this.reservationForm = this.fb.group({
       buildingId: ['', Validators.required],
@@ -55,20 +60,46 @@ export class NewReservationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getPreselectedParams();
     this.loadBuildings();
     this.setupFormSubscriptions();
+  }
+
+  private getPreselectedParams(): void {
+    this.route.params.subscribe(params => {
+      const buildingId = params['buildingId'];
+      const roomId = params['roomId'];
+
+      if (buildingId && roomId) {
+        this.preSelectedBuildingId = +buildingId;
+        this.preSelectedRoomId = +roomId;
+      }
+    });
   }
 
   loadBuildings(): void {
     this.apiService.getBuildings().subscribe({
       next: (buildings) => {
         this.buildings = buildings;
+        this.setFieldsFromRouter();
       },
       error: (error) => {
         console.error('Error loading buildings:', error);
         this.snackBar.open('Error loading buildings', 'Close', {duration: 3000});
       }
     });
+  }
+
+  private setFieldsFromRouter(): void {
+    if (this.preSelectedBuildingId && this.preSelectedRoomId) {
+      this.selectedBuilding = this.buildings.find(b => b.id === this.preSelectedBuildingId) || null;
+
+      if (this.selectedBuilding) {
+        this.reservationForm.patchValue({ buildingId: this.selectedBuilding.id });
+
+        this.loadRooms(this.selectedBuilding.id, this.preSelectedRoomId);
+      }
+    }
   }
 
   setupFormSubscriptions(): void {
@@ -87,10 +118,17 @@ export class NewReservationComponent implements OnInit {
     }
   }
 
-  loadRooms(buildingId: number): void {
+  loadRooms(buildingId: number, preSelectRoomId?: number): void {
     this.apiService.getRoomsByBuilding(buildingId).subscribe({
       next: (rooms) => {
         this.availableRooms = rooms;
+
+        if (preSelectRoomId) {
+          this.selectedRoom = this.availableRooms.find(r => r.id === preSelectRoomId) || null;
+
+          if (this.selectedRoom)
+            this.reservationForm.patchValue({roomId: this.selectedRoom.id});
+        }
       },
       error: (error) => {
         console.error('Error loading rooms:', error);
@@ -132,10 +170,13 @@ export class NewReservationComponent implements OnInit {
       });
     }
   }
+
   resetForm(): void {
     this.reservationForm.reset();
     this.selectedBuilding = null;
     this.selectedRoom = null;
     this.availableRooms = [];
+    this.preSelectedBuildingId = null;
+    this.preSelectedRoomId = null;
   }
 }

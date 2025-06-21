@@ -14,7 +14,6 @@ public class Meeting : BaseEntity
     [StringLength(1000)]
     public string ParticipantsList { get; set; }
 
-    // Navigation properties
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public bool ValidateCapacity(Room room)

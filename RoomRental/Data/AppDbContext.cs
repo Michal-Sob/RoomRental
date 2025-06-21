@@ -24,26 +24,28 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Many-to-many relationships 
         modelBuilder.Entity<Room>()
             .HasMany(r => r.Equipment)
-            .WithMany(e => e.Rooms)
-            .UsingEntity<Dictionary<string, object>>(
-                "RoomEquipment",
-                j => j.HasOne<Equipment>().WithMany().HasForeignKey("EquipmentId"),
-                j => j.HasOne<Room>().WithMany().HasForeignKey("RoomId"));
+            .WithMany(e => e.Rooms);
+        
+        // Composition relationship - Room cannot exist without Building
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.Building)
+            .WithMany(b => b.Rooms)
+            .HasForeignKey(r => r.BuildingId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Catering>()
             .HasMany(c => c.MenuItems)
-            .WithMany(m => m.Caterings)
-            .UsingEntity<Dictionary<string, object>>(
-                "CateringMenuItem",
-                j => j.HasOne<MenuItem>().WithMany().HasForeignKey("MenuItemId"),
-                j => j.HasOne<Catering>().WithMany().HasForeignKey("CateringId"));
+            .WithMany(m => m.Caterings);
 
+        // Inheritance 
         modelBuilder.Entity<AdditionalService>()
             .HasDiscriminator<string>("ServiceType")
             .HasValue<Catering>("Catering");
 
+        // Unique constraints 
         modelBuilder.Entity<Equipment>()
             .HasIndex(e => e.SerialNumber)
             .IsUnique();
@@ -60,18 +62,7 @@ public class AppDbContext : DbContext
             .HasIndex(d => d.DocumentNumber)
             .IsUnique();
 
-        modelBuilder.Entity<Reservation>()
-            .HasOne(r => r.Room)
-            .WithMany(room => room.Reservations)
-            .HasForeignKey(r => r.RoomId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Reservation>()
-            .HasOne(r => r.User)
-            .WithMany(u => u.Reservations)
-            .HasForeignKey(r => r.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
+        // money fields
         modelBuilder.Entity<Department>()
             .Property(d => d.Budget)
             .HasPrecision(18, 2);
@@ -95,104 +86,140 @@ public class AppDbContext : DbContext
 
     private void SeedData(ModelBuilder modelBuilder)
     {
+        // static dates instead of DateTime.UtcNow
+        var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        
         modelBuilder.Entity<Department>().HasData(
             new Department
             {
-                Id = 1, Name = "Information Technology", Code = "IT", Manager = "John Smith", Budget = 50000m,
-                CreatedAt = DateTime.UtcNow
+                Id = 1, 
+                Name = "Information Technology", 
+                Code = "IT", 
+                Manager = "John Smith", 
+                Budget = 50000m,
+                CreatedAt = seedDate
             },
             new Department
             {
-                Id = 2, Name = "Human Resources", Code = "HR", Manager = "Anna Johnson", Budget = 30000m,
-                CreatedAt = DateTime.UtcNow
+                Id = 2, 
+                Name = "Human Resources", 
+                Code = "HR", 
+                Manager = "Anna Johnson", 
+                Budget = 30000m,
+                CreatedAt = seedDate
             },
             new Department
             {
-                Id = 3, Name = "Sales", Code = "SALES", Manager = "Peter Williams", Budget = 40000m,
-                CreatedAt = DateTime.UtcNow
+                Id = 3, 
+                Name = "Sales", 
+                Code = "SALES", 
+                Manager = "Peter Williams", 
+                Budget = 40000m,
+                CreatedAt = seedDate
             }
         );
         
         modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = 1, FirstName = "Admin", LastName = "System", Email = "admin@company.com", Phone = "123456789",
-                Role = UserRole.Administrator, DepartmentId = 1, CreatedAt = DateTime.UtcNow
+                Id = 1, 
+                FirstName = "Admin", 
+                LastName = "System", 
+                Email = "admin@company.com", 
+                Phone = "123456789",
+                Role = UserRole.Administrator, 
+                DepartmentId = 1, 
+                CreatedAt = seedDate
             },
             new User
             {
-                Id = 2, FirstName = "Marcus", LastName = "Brown", Email = "m.brown@company.com",
-                Phone = "987654321", Role = UserRole.RegularUser, DepartmentId = 2, CreatedAt = DateTime.UtcNow
+                Id = 2, 
+                FirstName = "Marcus", 
+                LastName = "Brown", 
+                Email = "m.brown@company.com",
+                Phone = "987654321", 
+                Role = UserRole.RegularUser, 
+                DepartmentId = 2, 
+                CreatedAt = seedDate
             },
             new User
             {
-                Id = 3, FirstName = "Catherine", LastName = "Davis", Email = "c.davis@company.com",
-                Phone = "555666777", Role = UserRole.Moderator, DepartmentId = 3, CreatedAt = DateTime.UtcNow
+                Id = 3, 
+                FirstName = "Catherine", 
+                LastName = "Davis", 
+                Email = "c.davis@company.com",
+                Phone = "555666777", 
+                Role = UserRole.Moderator, 
+                DepartmentId = 3, 
+                CreatedAt = seedDate
             }
         );
 
         modelBuilder.Entity<Building>().HasData(
             new Building
             {
-                Id = 1, Name = "Building A", Address = "123 Main St, New York", NumberOfFloors = 5,
-                Status = BuildingStatus.Open, OpeningTime = new TimeSpan(7, 0, 0),
-                ClosingTime = new TimeSpan(22, 0, 0), CreatedAt = DateTime.UtcNow
+                Id = 1, 
+                Name = "Building A", 
+                Address = "123 Main St, New York", 
+                NumberOfFloors = 5,
+                Status = BuildingStatus.Open, 
+                OpeningTime = new TimeSpan(7, 0, 0),
+                ClosingTime = new TimeSpan(22, 0, 0), 
+                CreatedAt = seedDate
             },
             new Building
             {
-                Id = 2, Name = "Building B", Address = "456 Business Ave, Chicago", NumberOfFloors = 3,
-                Status = BuildingStatus.Open, OpeningTime = new TimeSpan(8, 0, 0),
-                ClosingTime = new TimeSpan(20, 0, 0), CreatedAt = DateTime.UtcNow
-            }
-        );
-
-        modelBuilder.Entity<Room>().HasData(
-            new Room
-            {
-                Id = 1, Name = "Conference Room 101", Capacity = 20, Floor = 1, Type = RoomType.Regular,
-                Status = RoomStatus.Available, BuildingId = 1, CreatedAt = DateTime.UtcNow
-            },
-            new Room
-            {
-                Id = 2, Name = "VIP Conference Suite", Capacity = 50, Floor = 2, Type = RoomType.VIP,
-                Status = RoomStatus.Available, BuildingId = 1, CreatedAt = DateTime.UtcNow
-            },
-            new Room
-            {
-                Id = 3, Name = "Auditorium", Capacity = 100, Floor = 1, Type = RoomType.Lecture,
-                Status = RoomStatus.Available, BuildingId = 2, CreatedAt = DateTime.UtcNow
-            },
-            new Room
-            {
-                Id = 4, Name = "Meeting Room 102", Capacity = 15, Floor = 1, Type = RoomType.Regular,
-                Status = RoomStatus.Available, BuildingId = 1, CreatedAt = DateTime.UtcNow
+                Id = 2, 
+                Name = "Building B", 
+                Address = "456 Business Ave, Chicago", 
+                NumberOfFloors = 3,
+                Status = BuildingStatus.Open, 
+                OpeningTime = new TimeSpan(8, 0, 0),
+                ClosingTime = new TimeSpan(20, 0, 0), 
+                CreatedAt = seedDate
             }
         );
 
         modelBuilder.Entity<Equipment>().HasData(
             new Equipment
             {
-                Id = 1, Name = "HD Projector", SerialNumber = "PRJ001", Manufacturer = "Epson",
-                PurchaseDate = DateTime.UtcNow.AddYears(-2), Status = EquipmentStatus.Working,
-                CreatedAt = DateTime.UtcNow
+                Id = 1, 
+                Name = "HD Projector", 
+                SerialNumber = "PRJ001", 
+                Manufacturer = "Epson",
+                PurchaseDate = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Status = EquipmentStatus.Working,
+                CreatedAt = seedDate
             },
             new Equipment
             {
-                Id = 2, Name = "4K Projector", SerialNumber = "PRJ002", Manufacturer = "BenQ",
-                PurchaseDate = DateTime.UtcNow.AddYears(-1), Status = EquipmentStatus.Working,
-                CreatedAt = DateTime.UtcNow
+                Id = 2, 
+                Name = "4K Projector", 
+                SerialNumber = "PRJ002", 
+                Manufacturer = "BenQ",
+                PurchaseDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Status = EquipmentStatus.Working,
+                CreatedAt = seedDate
             },
             new Equipment
             {
-                Id = 3, Name = "Air Conditioning", SerialNumber = "AC001", Manufacturer = "Daikin",
-                PurchaseDate = DateTime.UtcNow.AddYears(-3), Status = EquipmentStatus.Working,
-                CreatedAt = DateTime.UtcNow
+                Id = 3, 
+                Name = "Air Conditioning", 
+                SerialNumber = "AC001", 
+                Manufacturer = "Daikin",
+                PurchaseDate = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Status = EquipmentStatus.Working,
+                CreatedAt = seedDate
             },
             new Equipment
             {
-                Id = 4, Name = "Sound System", SerialNumber = "SND001", Manufacturer = "Bose",
-                PurchaseDate = DateTime.UtcNow.AddMonths(-6), Status = EquipmentStatus.Working,
-                CreatedAt = DateTime.UtcNow
+                Id = 4, 
+                Name = "Sound System", 
+                SerialNumber = "SND001", 
+                Manufacturer = "Bose",
+                PurchaseDate = new DateTime(2023, 7, 1, 0, 0, 0, DateTimeKind.Utc),
+                Status = EquipmentStatus.Working,
+                CreatedAt = seedDate
             }
         );
 
@@ -204,7 +231,7 @@ public class AppDbContext : DbContext
                 Description = "Variety of fresh sandwiches",
                 Price = 25.00m,
                 Category = MenuCategory.MainCourse,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = seedDate,
                 Allergens = "gluten, eggs, milk"
             },
             new MenuItem
@@ -214,7 +241,7 @@ public class AppDbContext : DbContext
                 Description = "Fresh salad with chicken",
                 Price = 18.00m,
                 Category = MenuCategory.Appetizer,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = seedDate,
                 Allergens = "eggs, milk, fish"
             },
             new MenuItem
@@ -224,7 +251,7 @@ public class AppDbContext : DbContext
                 Description = "Freshly brewed coffee",
                 Price = 8.00m,
                 Category = MenuCategory.Beverage,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = seedDate,
                 Allergens = ""
             },
             new MenuItem
@@ -234,7 +261,7 @@ public class AppDbContext : DbContext
                 Description = "Homemade chocolate cake",
                 Price = 12.00m,
                 Category = MenuCategory.Dessert,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = seedDate,
                 Allergens = "gluten, eggs, milk, soy"
             }
         );

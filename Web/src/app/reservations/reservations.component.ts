@@ -9,6 +9,7 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {RouterLink} from "@angular/router";
 import {NgForOf, NgIf} from "@angular/common";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-reservations',
@@ -33,9 +34,13 @@ export class ReservationsComponent implements OnInit {
   pastReservations: ReservationDto[] = [];
   cancelledReservations: ReservationDto[] = [];
   isLoading = true;
+  cancellingIds = new Set<number>();
+  deletingIds = new Set<number>();
+
 
   constructor(
     private apiService: ApiService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -78,7 +83,6 @@ export class ReservationsComponent implements OnInit {
   }
 
   onTabChange(event: any): void {
-    // Handle tab change if needed
   }
 
   isToday(date: string): boolean {
@@ -107,6 +111,110 @@ export class ReservationsComponent implements OnInit {
     }
   }
 
+  viewDetails(reservation: ReservationDto): void {
+    console.log('View details for reservation:', reservation);
+  }
+
+  cancelReservation(reservation: ReservationDto): void {
+    const message = `Cancel "${reservation.room?.name}" on ${this.formatDate(reservation.date)}?`;
+
+    if (!confirm(message)) return;
+
+    this.cancellingIds.add(reservation.id);
+
+    this.apiService.cancelReservation(reservation.id).subscribe({
+      next: (response) => {
+        this.cancellingIds.delete(reservation.id);
+        this.snackBar.open(response.message, 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+
+        // Update local state
+        this.updateReservationStatus(reservation.id, ReservationStatus.Cancelled);
+      },
+      error: (error) => {
+        this.cancellingIds.delete(reservation.id);
+        const errorMessage = error.error?.message || 'Cannot cancel this reservation';
+        this.snackBar.open(errorMessage, 'Close', {
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  private updateReservationStatus(reservationId: number, newStatus: ReservationStatus): void {
+    const reservation = this.reservations.find(r => r.id === reservationId);
+    if (reservation) {
+      reservation.status = newStatus;
+      this.categorizeReservations();
+    }
+  }
+
+  isCancelling(reservationId: number): boolean {
+    return this.cancellingIds.has(reservationId);
+  }
+
+  canCancel(reservation: ReservationDto): boolean {
+    if (reservation.status !== ReservationStatus.Confirmed) {
+      return false;
+    }
+
+    const dateOnly = reservation.date.split('T')[0];
+    const reservationDateTime = new Date(`${dateOnly}T${reservation.startTime}:00`);
+    const now = new Date();
+    // (1000 * 60 * 60) = milliseconds in an hour
+    const hoursUntilReservation = (reservationDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    return hoursUntilReservation > 2;
+  }
+
+  deleteReservation(reservation: ReservationDto): void {
+    const message = `Delete reservation for "${reservation.room?.name}" on ${this.formatDate(reservation.date)}?.`;
+
+    if (!confirm(message)) return;
+
+    this.deletingIds.add(reservation.id);
+
+    this.apiService.deleteReservation(reservation.id).subscribe({
+      next: (response) => {
+        this.deletingIds.delete(reservation.id);
+        this.snackBar.open('Reservation deleted', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+
+        this.removeReservationFromState(reservation.id);
+      },
+      error: (error) => {
+        this.deletingIds.delete(reservation.id);
+        const errorMessage = error.error?.message || 'Cannot delete this reservation';
+        this.snackBar.open(errorMessage, 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  isDeleting(reservationId: number): boolean {
+    return this.deletingIds.has(reservationId);
+  }
+
+  canDelete(reservation: ReservationDto): boolean {
+    return reservation.status === ReservationStatus.Cancelled;
+  }
+
+  private removeReservationFromState(reservationId: number): void {
+    this.reservations = this.reservations.filter(r => r.id !== reservationId);
+    this.categorizeReservations();
+  }
+
+  bookAgain(reservation: ReservationDto): void {
+    console.log('Book again:', reservation);
+  }
+
   getStatusText(status: number): string {
     switch (status) {
       case 0: return 'Pending';
@@ -114,31 +222,5 @@ export class ReservationsComponent implements OnInit {
       case 2: return 'Cancelled';
       default: return 'Unknown';
     }
-  }
-
-  canCancel(reservation: ReservationDto): boolean {
-    const reservationDate = new Date(reservation.date);
-    const now = new Date();
-    const hoursUntilReservation = (reservationDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-    return hoursUntilReservation > 2 && reservation.status === ReservationStatus.Confirmed;
-  }
-
-  viewDetails(reservation: ReservationDto): void {
-    // Implement view details functionality
-    console.log('View details for reservation:', reservation);
-  }
-
-  cancelReservation(reservation: ReservationDto): void {
-    // Implement cancel reservation functionality
-    if (confirm('Are you sure you want to cancel this reservation?')) {
-      // API call to cancel reservation
-      console.log('Cancel reservation:', reservation);
-    }
-  }
-
-  bookAgain(reservation: ReservationDto): void {
-    // Navigate to new reservation form with pre-filled data
-    console.log('Book again:', reservation);
   }
 }

@@ -15,15 +15,9 @@ export class ApiService {
     return this.http.get<BuildingListDto[]>(`${this.baseUrl}/buildings`);
   }
 
-
-  getBuildingWithRooms(buildingId: number): Observable<BuildingDto> {
-    return this.http.get<BuildingDto>(`${this.baseUrl}/buildings/${buildingId}/rooms`);
-  }
-
   getRoomsByBuilding(buildingId: number): Observable<RoomDto[]> {
     return this.http.get<RoomDto[]>(`${this.baseUrl}/rooms/building/${buildingId}`);
   }
-
 
   getReservations(): Observable<ReservationDto[]> {
     return this.http.get<ReservationDto[]>(`${this.baseUrl}/reservations`);
@@ -32,4 +26,13 @@ export class ApiService {
   createReservation(reservation: CreateReservationDto): Observable<ReservationDto> {
     return this.http.post<ReservationDto>(`${this.baseUrl}/reservations`, reservation);
   }
+
+  cancelReservation(reservationId: number): Observable<{message: string}> {
+    return this.http.put<{message: string}>(`${this.baseUrl}/reservations/${reservationId}/cancel`, {});
+  }
+
+  deleteReservation(reservationId: number): Observable<{message: string}> {
+    return this.http.delete<{message: string}>(`${this.baseUrl}/reservations/${reservationId}`);
+  }
+
 }

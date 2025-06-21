@@ -1,32 +1,8 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.header-card {
+  margin-bottom: 2rem;
 }
 
-html, body {
-  height: 100%;
-}
-
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
-
-// Custom snackbar styles
-.success-snackbar {
-  background: #10b981 !important;
-  color: white !important;
-}
-
-.error-snackbar {
-  background: #ef4444 !important;
-  color: white !important;
-}
-
-// Beautiful scrollbar
+// scrollbar
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -45,22 +21,6 @@ body {
   background: rgba(102, 126, 234, 0.8);
 }
 
-// Glassmorphism effects
-.mat-mdc-card {
-  border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-// Form field styling
-.mat-mdc-form-field .mdc-notched-outline__leading,
-.mat-mdc-form-field .mdc-notched-outline__notch,
-.mat-mdc-form-field .mdc-notched-outline__trailing {
-  border-radius: 8px !important;
-}
-
 // Button styling
 .mat-mdc-raised-button {
   border-radius: 8px !important;
@@ -70,11 +30,6 @@ body {
 .mat-mdc-raised-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-}
-
-// Chip styling
-.mat-mdc-chip {
-  border-radius: 16px !important;
 }
 
 // Hover animations
@@ -99,25 +54,10 @@ body {
 }
 
 // Status colors
-.status-0 { background: #10b981; color: white; }
-.status-1 { background: #f59e0b; color: white; }
-.status-2 { background: #ef4444; color: white; }
+.status-0 { background: #0ba373; color: white; }
+.status-1 { background: #cd860f; color: white; }
+.status-2 { background: #fa3737; color: white; }
 
-.type-0 { background: #3b82f6; color: white; }
-.type-1 { background: #8b5cf6; color: white; }
-.type-2 { background: #f59e0b; color: white; }
-
-// Responsive design
-@media (max-width: 768px) {
-  .content-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .rooms-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
+.type-0 { background: #3177ea; color: white; }
+.type-1 { background: #7d53df; color: white; }
+.type-2 { background: #cd860f; color: white; }

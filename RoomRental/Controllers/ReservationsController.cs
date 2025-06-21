@@ -80,4 +80,51 @@ public class ReservationsController : ControllerBase
             return StatusCode(500, new { message = "Error creating reservation", error = ex.Message });
         }
     }
+    
+    [HttpPut("{id}/cancel")]
+    public async Task<IActionResult> CancelReservation(int id)
+    {
+        try
+        {
+            var canCancel = await _reservationService.CanCancelReservationAsync(id);
+            if (!canCancel)
+            {
+                return BadRequest(new { message = "This reservation cannot be cancelled. Reservations can only be cancelled if they are confirmed and at least 2 hours before the start time." });
+            }
+
+            var success = await _reservationService.CancelReservationAsync(id);
+            if (!success)
+            {
+                return NotFound(new { message = "Reservation not found" });
+            }
+
+            return Ok(new { message = "Reservation cancelled successfully" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error cancelling reservation", error = ex.Message });
+        }
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteReservation(int id)
+    {
+        try
+        {
+            var success = await _reservationService.DeleteReservationAsync(id);
+            
+            if (!success)
+            {
+                return BadRequest(new { 
+                    message = "This reservation cannot be deleted. Only cancelled reservations can be deleted." 
+                });
+            }
+
+            return Ok(new { message = "Reservation deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error deleting reservation", error = ex.Message });
+        }
+    }
 }

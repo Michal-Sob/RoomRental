@@ -12,6 +12,7 @@ const routes: Routes = [
   { path: '', redirectTo: '/buildings', pathMatch: 'full' as const },
   { path: 'buildings', component: BuildingsComponent },
   { path: 'new-reservation', component: NewReservationComponent },
+  { path: 'new-reservation/:buildingId/:roomId', component: NewReservationComponent },
   { path: 'reservations', component: ReservationsComponent },
   { path: '**', redirectTo: '/buildings' }
 ];

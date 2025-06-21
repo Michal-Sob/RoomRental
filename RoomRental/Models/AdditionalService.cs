@@ -17,10 +17,8 @@ public abstract class AdditionalService : BaseEntity
 
     public TimeSpan PreparationTime { get; set; }
 
-    // Foreign Key
     public int ReservationId { get; set; }
 
-    // Navigation property
     [ForeignKey("ReservationId")]
     public virtual Reservation Reservation { get; set; }
 

@@ -15,7 +15,6 @@ public class Catering : AdditionalService
 
     public TimeSpan DeliveryTime { get; set; }
 
-    // Navigation properties
     public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
     public override bool Validate()

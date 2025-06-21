@@ -38,6 +38,7 @@
             </button>
           </div>
 
+          <!-- Upcoming Reservations -->
           <div class="reservations-grid" *ngIf="upcomingReservations.length > 0">
             <mat-card
               *ngFor="let reservation of upcomingReservations"
@@ -91,9 +92,12 @@
                 <button
                   mat-button
                   color="warn"
-                  [disabled]="!canCancel(reservation)"
+                  [disabled]="!canCancel(reservation) || isCancelling(reservation.id)"
                   (click)="cancelReservation(reservation)">
-                  <mat-icon>cancel</mat-icon>
+
+                  <mat-spinner *ngIf="isCancelling(reservation.id)" diameter="16"></mat-spinner>
+                  <mat-icon *ngIf="!isCancelling(reservation.id)">cancel</mat-icon>
+
                   Cancel
                 </button>
               </mat-card-actions>
@@ -219,6 +223,15 @@
                   (click)="bookAgain(reservation)">
                   <mat-icon>refresh</mat-icon>
                   Book Again
+                </button>
+                <button
+                  mat-button
+                  color="warn"
+                  [disabled]="!canDelete(reservation) || isDeleting(reservation.id)"
+                  (click)="deleteReservation(reservation)">
+
+                  <mat-spinner *ngIf="isDeleting(reservation.id)" diameter="16"></mat-spinner>
+                  <mat-icon *ngIf="!isDeleting(reservation.id)">delete</mat-icon>
                 </button>
               </mat-card-actions>
             </mat-card>

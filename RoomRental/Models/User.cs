@@ -24,10 +24,8 @@ public class User : BaseEntity
 
     public UserRole Role { get; set; }
 
-    // Foreign Keys
     public int DepartmentId { get; set; }
 
-    // Navigation properties
     [ForeignKey("DepartmentId")]
     public virtual Department Department { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
