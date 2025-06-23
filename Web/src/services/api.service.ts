@@ -35,4 +35,7 @@ export class ApiService {
     return this.http.delete<{message: string}>(`${this.baseUrl}/reservations/${reservationId}`);
   }
 
+  createRoom(room: RoomDto): Observable<RoomDto> {
+    return this.http.post<RoomDto>(`${this.baseUrl}/rooms`, room);
+  }
 }

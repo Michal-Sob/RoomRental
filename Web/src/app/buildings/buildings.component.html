@@ -58,6 +58,14 @@
       <mat-card-header>
         <mat-card-title>
           {{selectedBuilding ? selectedBuilding?.name + ' - Rooms' : 'Select a Building'}}
+          <button
+            *ngIf="selectedBuilding"
+            mat-raised-button
+            color="primary"
+            (click)="addRoomToBuilding(selectedBuilding)">
+            <mat-icon>add</mat-icon>
+            Add Room
+          </button>
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>

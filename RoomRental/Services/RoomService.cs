@@ -67,7 +67,14 @@ public async Task<IEnumerable<RoomDto>> GetRoomsByBuildingAsync(int buildingId)
             })
             .FirstOrDefaultAsync();
     }
-
+    
+    /// <summary>
+    /// Retrieves a list of available rooms for a given date and time range.
+    /// </summary>
+    /// <param name="date"></param>
+    /// <param name="startTime"></param>
+    /// <param name="endTime"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<RoomDto>> GetAvailableRoomsAsync(DateTime date, TimeSpan startTime, TimeSpan endTime)
     {
         var availableRoomIds = await _context.Rooms
@@ -95,6 +102,60 @@ public async Task<IEnumerable<RoomDto>> GetRoomsByBuildingAsync(int buildingId)
                 BuildingName = r.Building.Name
             })
             .ToListAsync();
+    }
+    
+        public async Task<RoomDto> CreateRoomAsync(RoomDto roomDto)
+    {
+            // Validation
+            if (string.IsNullOrWhiteSpace(roomDto.Name))
+                throw new ArgumentException("Room name is required");
+
+            if (roomDto.Capacity <= 0)
+                throw new ArgumentException("Capacity must be greater than 0");
+
+            if (roomDto.Floor < 0)
+                throw new ArgumentException("Floor must be 0 or greater");
+
+            
+            var building = await _context.Buildings.FindAsync(roomDto.BuildingId);
+            if (building == null)
+                throw new ArgumentException("Building not found");
+
+            // is room name unique in the building
+            var existingRoom = await _context.Rooms
+                .AnyAsync(r => r.BuildingId == roomDto.BuildingId && 
+                              r.Name.ToLower() == roomDto.Name.ToLower());
+
+            if (existingRoom)
+                throw new InvalidOperationException("A room with this name already exists in this building");
+
+            if (roomDto.Floor > building.NumberOfFloors)
+                throw new ArgumentException($"Floor cannot exceed building's number of floors ({building.NumberOfFloors})");
+
+            var room = new Room(building)
+            {
+                Name = roomDto.Name.Trim(),
+                Capacity = roomDto.Capacity,
+                Floor = roomDto.Floor,
+                Type = (RoomType)roomDto.Type,
+                Status = RoomStatus.Available,
+                BuildingId = building.Id
+            };
+
+            _context.Rooms.Add(room);
+            await _context.SaveChangesAsync();
+
+            return new RoomDto
+            {
+                Id = room.Id,
+                Name = room.Name,
+                Capacity = room.Capacity,
+                Floor = room.Floor,
+                Type = (int)room.Type,
+                Status = (int)room.Status,
+                BuildingId = room.BuildingId,
+                BuildingName = building.Name,
+            };
     }
 }
     

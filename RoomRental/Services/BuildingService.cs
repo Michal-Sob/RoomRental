@@ -14,6 +14,11 @@ public class BuildingService : IBuildingService
         _context = context;
     }
 
+    
+    /// <summary>
+    /// Retrieves a list of all buildings that are currently open.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<BuildingListDto>> GetAllBuildingsAsync()
     {
         return await _context.Buildings
@@ -31,6 +36,12 @@ public class BuildingService : IBuildingService
             .ToListAsync();
     }
 
+    
+    /// <summary>
+    /// Retrieves a specific building by its ID, including its rooms.
+    /// </summary>
+    /// <param name="buildingId"></param>
+    /// <returns></returns>
     public async Task<BuildingDto?> GetBuildingWithRoomsAsync(int buildingId)
     {
         var building = await _context.Buildings

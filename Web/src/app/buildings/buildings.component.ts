@@ -8,6 +8,9 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatChipsModule} from "@angular/material/chips";
 import {MatRippleModule} from "@angular/material/core";
 import {Router} from "@angular/router";
+import {MatDialog} from "@angular/material/dialog";
+import {AddRoomDialogComponent} from "../add-room-dialog/add-room-dialog.component";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-buildings',
@@ -18,7 +21,8 @@ import {Router} from "@angular/router";
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatRippleModule
+    MatRippleModule,
+    MatTooltipModule
   ],
   templateUrl: './buildings.component.html',
   styleUrl: './buildings.component.scss'
@@ -28,7 +32,9 @@ export class BuildingsComponent implements OnInit {
   rooms: RoomDto[] = [];
   selectedBuilding: BuildingDto | null = null;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService,
+              private router: Router,
+              private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.loadBuildings();
@@ -64,6 +70,22 @@ export class BuildingsComponent implements OnInit {
   reserveRoom(room: RoomDto): void {
     this.router.navigate(['/new-reservation', room.buildingId, room.id]);
     console.log('Reserve room:', room);
+  }
+
+  addRoomToBuilding(building: BuildingListDto): void {
+    const dialogRef = this.dialog.open(AddRoomDialogComponent, {
+      width: '600px',
+      data: { building }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Add new room to local state if this building is selected
+        if (this.selectedBuilding && this.selectedBuilding.id === building.id) {
+          this.rooms.push(result);
+        }
+      }
+    });
   }
 
   getBuildingStatusText(status: number): string {

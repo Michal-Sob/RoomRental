@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RoomRental.Models.Dtos;
 using RoomRental.Services;
 
 namespace RoomRental.Controllers;
@@ -64,6 +65,25 @@ public class RoomsController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Error retrieving available rooms", error = ex.Message });
+        }
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateRoom([FromBody] RoomDto dto)
+    {
+        try
+        {
+            var room = await _roomService.CreateRoomAsync(dto);
+            
+            return StatusCode(201, room);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error creating room", error = ex.Message });
         }
     }
 }

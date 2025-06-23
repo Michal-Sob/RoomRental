@@ -6,15 +6,22 @@ using RoomRental.Models.Dtos;
 namespace RoomRental.Services;
 
 public class ReservationService : IReservationService
+{
+    private readonly AppDbContext _context;
+
+    public ReservationService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-
-        public ReservationService(AppDbContext context)
-        {
-            _context = context;
-        }
-
- public async Task<ReservationDto> CreateReservationAsync(CreateReservationDto dto)
+        _context = context;
+    }
+    
+    /// <summary>
+    /// Creates a new reservation for a room.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<ReservationDto> CreateReservationAsync(CreateReservationDto dto)
     {
         if (!TimeSpan.TryParse(dto.StartTime, out var startTime))
             throw new ArgumentException("Invalid start time format");
@@ -55,7 +62,11 @@ public class ReservationService : IReservationService
         return await GetReservationAsync(reservation.Id) ?? 
             throw new InvalidOperationException("Failed to retrieve created reservation");
     }
-
+ 
+    /// <summary>
+    /// Retrieves a list of all reservations, including user and room details.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<ReservationDto>> GetAllReservationsAsync()
     {
         return await _context.Reservations
@@ -89,6 +100,12 @@ public class ReservationService : IReservationService
             .ToListAsync();
     }
 
+    
+    /// <summary>
+    /// Retrieves a list of reservations made by a specific user, including room and building details.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<ReservationListDto>> GetReservationsByUserAsync(int userId)
     {
         return await _context.Reservations
@@ -109,6 +126,12 @@ public class ReservationService : IReservationService
             .ToListAsync();
     }
 
+    
+    /// <summary>
+    /// Retrieves a reservation by its ID, including user and room details.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ReservationDto?> GetReservationAsync(int id)
     {
         return await _context.Reservations
@@ -168,6 +191,11 @@ public class ReservationService : IReservationService
         return true;
     }
 
+    /// <summary>
+    /// Checks if a reservation can be cancelled.
+    /// </summary>
+    /// <param name="reservationId"></param>
+    /// <returns></returns>
     public async Task<bool> CanCancelReservationAsync(int reservationId)
     {
         var reservation = await _context.Reservations
@@ -184,6 +212,12 @@ public class ReservationService : IReservationService
         return hoursUntilReservation > 2;
     }
     
+    
+    /// <summary>
+    /// Deletes a reservation if it is cancelled.
+    /// </summary>
+    /// <param name="reservationId"></param>
+    /// <returns></returns>
     public async Task<bool> DeleteReservationAsync(int reservationId)
     {
         var reservation = await _context.Reservations
