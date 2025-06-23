@@ -1,0 +1,93 @@
+<h2 mat-dialog-title>
+  <mat-icon>add_circle</mat-icon>
+  Add New Room to {{data.building.name}}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="roomForm" class="room-form">
+    <div class="building-info">
+      <h4>Building Information:</h4>
+      <p><strong>{{data.building.name}}</strong></p>
+      <p>{{data.building.address}}</p>
+      <p>Floors: 0 - {{data.building.numberOfFloors}}</p>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Room Name</mat-label>
+        <input matInput formControlName="name" placeholder="Conference Room A">
+        <mat-icon matSuffix>meeting_room</mat-icon>
+        <mat-error *ngIf="roomForm.get('name')?.hasError('required')">
+          Room name is required
+        </mat-error>
+        <mat-error *ngIf="roomForm.get('name')?.hasError('minlength')">
+          Room name must be at least 2 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Capacity</mat-label>
+        <input matInput type="number" formControlName="capacity" min="1" max="1000">
+        <mat-icon matSuffix>people</mat-icon>
+        <mat-error *ngIf="roomForm.get('capacity')?.hasError('required')">
+          Capacity is required
+        </mat-error>
+        <mat-error *ngIf="roomForm.get('capacity')?.hasError('min')">
+          Capacity must be at least 1
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Floor</mat-label>
+        <mat-select formControlName="floor">
+          <mat-option *ngFor="let floor of availableFloors" [value]="floor">
+            {{floor === 0 ? 'Ground Floor' : 'Floor ' + floor}}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>layers</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Room Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option [value]="RoomType.Regular">
+            <div class="option-content">
+              <span>Regular Room</span>
+              <small>$50/hour - Standard meeting room</small>
+            </div>
+          </mat-option>
+          <mat-option [value]="RoomType.Lecture">
+            <div class="option-content">
+              <span>Lecture Hall</span>
+              <small>$75/hour - Large presentation space</small>
+            </div>
+          </mat-option>
+          <mat-option [value]="RoomType.VIP">
+            <div class="option-content">
+              <span>VIP Suite</span>
+              <small>$150/hour - Premium conference room</small>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="roomForm.get('type')?.value !== null">
+      <mat-icon>attach_money</mat-icon>
+      <span>Hourly Rate: {{getHourlyRate(roomForm.get('type')?.value)}}</span>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="!roomForm.valid || isLoading"
+    (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{isLoading ? 'Creating...' : 'Create Room'}}
+  </button>
+</mat-dialog-actions>
